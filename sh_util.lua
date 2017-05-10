@@ -144,7 +144,7 @@ function string.RemoveTextFromEnd(str, strNeedle, bAllOccurences)
 			return str
 		end
 
-		return str:utf8sub(1, str:utf8len() - strNeedle:utf8len())
+		return str:sub(1, str:len() - strNeedle:len())
 	else
 		return str
 	end
@@ -165,7 +165,7 @@ function string.RemoveTextFromStart(str, strNeedle, bAllOccurences)
 			return str
 		end
 
-		return str:utf8sub(strNeedle:utf8len() + 1, str:utf8len())
+		return str:sub(strNeedle:len() + 1, str:len())
 	else
 		return str
 	end
@@ -527,9 +527,9 @@ function player.Find(name, bCaseSensitive)
 	for k, v in ipairs(_player.GetAll()) do
 		if (v:Name(true):find(name)) then
 			return v
-		elseif (!bCaseSensitive and v:Name(true):utf8lower():find(name:utf8lower())) then
+		elseif (!bCaseSensitive and v:Name(true):lower():find(name:lower())) then
 			return v
-		elseif (v:SteamName():utf8lower():find(name:utf8lower())) then
+		elseif (v:SteamName():lower():find(name:lower())) then
 			return v
 		elseif (v:SteamID() == name) then
 			return v
@@ -539,12 +539,12 @@ end
 
 -- A function to check whether the string is full uppercase or not.
 function string.IsUppercase(str)
-	return string.utf8upper(str) == str
+	return string.upper(str) == str
 end
 
 -- A function to check whether the string is full lowercase or not.
 function string.IsLowercase(str)
-	return string.utf8lower(str) == str
+	return string.lower(str) == str
 end
 
 -- A function to find all occurences of a substring in a string.
@@ -561,7 +561,7 @@ function string.FindAll(str, pattern)
 			break
 		end
 
-		table.insert(hits, {string.utf8sub(str, startPos, endPos), startPos, endPos})
+		table.insert(hits, {string.sub(str, startPos, endPos), startPos, endPos})
 
 		lastPos = endPos + 1
 	end
@@ -594,7 +594,7 @@ do
 	}
 
 	function string.MakeID(str)
-		str = str:utf8lower()
+		str = str:lower()
 		str = str:gsub(" ", "_")
 
 		for k, v in ipairs(blockedChars) do
