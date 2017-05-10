@@ -520,20 +520,32 @@ function player.Random()
 end
 
 -- A function to find player based on their name or steamID.
-function player.Find(name, bCaseSensitive)
+-- Returns playerObject if only one matching player was found.
+-- Returns a table if multiple players were found.
+function player.Find(name, bCaseSensitive, bReturnFirstHit)
 	if (name == nil) then return end
-	if (!isstring(name)) then return (IsValid(name) and name) or nil; end
+	if (!isstring(name)) then return (IsValid(name) and name) or nil end
+
+	local hits = {}
 
 	for k, v in ipairs(_player.GetAll()) do
-		if (v:Name(true):find(name)) then
-			return v
-		elseif (!bCaseSensitive and v:Name(true):lower():find(name:lower())) then
-			return v
-		elseif (v:SteamName():lower():find(name:lower())) then
-			return v
-		elseif (v:SteamID() == name) then
-			return v
+		if (v:SteamID() == name) then
+			table.insert(hits, v)
+		elseif (v:Name():find(name)) then
+			table.insert(hits, v)
+		elseif (!bCaseSensitive and v:Name():lower():find(name:lower())) then
+			table.insert(hits, v)
 		end
+
+		if (bReturnFirstHit and #hits > 0) then
+			return hits[1]
+		end
+	end
+
+	if (#hits > 1) then
+		return hits
+	else
+		return hits[1]
 	end
 end
 
@@ -608,20 +620,24 @@ end
 do
 	local cache = {}
 
-	function util.GetTextSize(text, font)
+	function util.GetTextSize(text, font, bNoCache)
 		font = font or "default"
 
-		if (cache[text] and cache[text][font]) then
+		if (!bNoCache and cache[text] and cache[text][font]) then
 			local textSize = cache[text][font]
 
 			return textSize[1], textSize[2]
 		else
 			surface.SetFont(font)
 
-			cache[text] = {}
-			cache[text][font] = {surface.GetTextSize(text)}
+			local result = {surface.GetTextSize(text)}
 
-			return util.GetTextSize(text, font)
+			if (!bNoCache) then
+				cache[text] = {}
+				cache[text][font] = result
+			end
+
+			return result[1], result[2]
 		end
 	end
 end
