@@ -39,7 +39,7 @@ function Try(id, func, ...)
 		ErrorNoHalt("[Try:"..id.."] Failed to run the function!\n")
 		ErrorNoHalt(unpack(result), "\n")
 	elseif (result[1] != nil) then
-		return unpack[result]
+		return unpack(result)
 	end
 end
 
@@ -79,7 +79,7 @@ do
 				ErrorNoHalt(unpack(result), "\n")
 			end
 		elseif (result[1] != nil) then
-			return unpack[result]
+			return unpack(result)
 		end
 	end
 
