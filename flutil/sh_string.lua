@@ -131,3 +131,166 @@ do
 		return str
 	end
 end
+
+-- A function to convers vararg to a string list.
+function util.ListToString(callback, separator, ...)
+	if (!isfunction(callback)) then
+		callback = function(obj) return tostring(obj) end
+	end
+
+	if (!isstring(separator)) then
+		separator = ", "
+	end
+
+	local list = {...}
+	local result = ""
+
+	for k, v in ipairs(list) do
+		local text = callback(v)
+
+		if (isstring(text)) then
+			result = result..text
+		end
+
+		if (k < #list) then
+			result = result..separator
+		end
+	end
+
+	return result
+end
+
+-- A function to check whether a string is a number.
+function string.IsNumber(char)
+	return (tonumber(char) != nil)
+end
+
+-- A function to count character in a string.
+function string.CountCharacter(str, char)
+	local exploded = string.Explode("", str)
+	local hits = 0
+
+	for k, v in ipairs(exploded) do
+		if (v == char) then
+			if (char == "\"") then
+				local prevChar = exploded[k - 1] or ""
+
+				if (prevChar == "\\") then
+					continue
+				end
+			end
+
+			hits = hits + 1
+		end
+	end
+
+	return hits
+end
+
+-- INTERNAL: used to remove all newlines from table that is passed to BuildTableFromString.
+function util.SmartRemoveNewlines(str)
+	local exploded = string.Explode("", str)
+	local toReturn = ""
+	local skip = ""
+
+	for k, v in ipairs(exploded) do
+		if (skip != "") then
+			toReturn = toReturn..v
+
+			if (v == skip) then
+				skip = ""
+			end
+
+			continue
+		end
+
+		if (v == "\"") then
+			skip = "\""
+
+			toReturn = toReturn..v
+
+			continue
+		end
+
+		if (v == "\n" or v == "\t") then
+			continue
+		end
+
+		toReturn = toReturn..v
+	end
+
+	return toReturn
+end
+
+-- A function to build a table from string.
+-- It has /almost/ the same syntax as Lua tables,
+-- except key-values ONLY work like this {key = "value"},
+-- so, NO {["key"] = "value"} or {[1] = value}, THOSE WON'T WORK.
+-- This supports tables-inside-tables structure.
+function util.BuildTableFromString(str)
+	str = util.SmartRemoveNewlines(str)
+
+	local exploded = string.Explode(",", str)
+	local tab = {}
+
+	for k, v in ipairs(exploded) do
+		if (!isstring(v)) then continue end
+
+		if (!string.find(v, "=")) then
+			v = v:RemoveTextFromStart(" ", true)
+
+			if (string.IsNumber(v)) then
+				v = tonumber(v)
+			elseif (string.find(v, "\"")) then
+				v = v:RemoveTextFromStart("\""):RemoveTextFromEnd("\"")
+			elseif (v:find("{")) then
+				v = v:Replace("{", "")
+
+				local lastKey = nil
+				local buff = v
+
+				for k2, v2 in ipairs(exploded) do
+					if (k2 <= k) then continue end
+
+					if (v2:find("}")) then
+						buff = buff..","..v2:Replace("}", "")
+
+						lastKey = k2
+
+						break
+					end
+
+					buff = buff..","..v2
+				end
+
+				if (lastKey) then
+					for i = k, lastKey do
+						exploded[i] = nil
+					end
+
+					v = util.BuildTableFromString(buff)
+				end
+			else
+				v = v:RemoveTextFromEnd("}")
+			end
+
+			table.insert(tab, v)
+		else
+			local parts = string.Explode("=", v)
+			local key = parts[1]:RemoveTextFromEnd(" ", true):RemoveTextFromEnd("\t", true)
+			local value = parts[2]:RemoveTextFromStart(" ", true):RemoveTextFromStart("\t", true)
+
+			if (string.IsNumber(value)) then
+				value = tonumber(value)
+			elseif (value:find("{") and value:find("}")) then
+				value = util.BuildTableFromString(value)
+			else
+				value = value:RemoveTextFromEnd("}")
+			end
+
+			tab[key] = value
+		end
+	end
+
+	return tab
+end
