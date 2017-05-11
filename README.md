@@ -3,6 +3,11 @@ A utility library used throughout various projects of mine.
 
 THIS IS NOT AN ADDON! INCLUDE THIS WITH YOUR PROJECT IF YOU WISH TO USE IT.
 
+# Installing
+Put the library anywhere in your project and include it either part-by-part or all at once via sh_all.lua file.
+
+# Documentation
+
 It features the following functions:
 
 ```lua
@@ -102,6 +107,28 @@ function util.VectorIsInPoly(point, polyVertices)
 
 -- A safer way to merge two tables.
 function table.SafeMerge(to, from)
+
+-- A function to convers vararg to a string list.
+function util.ListToString(callback, separator, ...)
+
+-- A function to check whether a string is a number.
+function string.IsNumber(char)
+
+-- A function to count character in a string.
+function string.CountCharacter(str, char)
+
+-- INTERNAL: used to remove all newlines from table that is passed to BuildTableFromString.
+function util.SmartRemoveNewlines(str)
+
+-- A function to build a table from string.
+-- It has /almost/ the same syntax as Lua tables,
+-- except key-values ONLY work like this {key = "value"},
+-- so, NO {["key"] = "value"} or {[1] = value}, THOSE WON'T WORK.
+-- This supports tables-inside-tables structure.
+function util.BuildTableFromString(str)
+
+-- A function to 'flatten' a numeric-indexed table (eliminate all tables-inside-tables).
+function table.Flatten(tTable, tResult)
 ```
 
 It also adds the following functionality to Color meta table:
