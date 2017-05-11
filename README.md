@@ -1,6 +1,8 @@
 # fl-util
 A utility library used throughout various projects of mine.
 
+THIS IS NOT AN ADDON! INCLUDE THIS WITH YOUR PROJECT IF YOU WISH TO USE IT.
+
 It features the following functions:
 
 ```lua
